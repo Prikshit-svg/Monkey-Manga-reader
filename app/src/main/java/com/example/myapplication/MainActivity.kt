@@ -15,9 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavType
@@ -37,12 +34,12 @@ import com.example.myapplication.screens.LibraryScreen
 import com.example.myapplication.screens.ReaderScreen
 import com.example.myapplication.screens.SeriesDetailScreen
 import com.example.myapplication.ui.theme.MyApplicationTheme
+import com.example.myapplication.viewmodels.HomeViewModel
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.firebase.auth.FirebaseAuth
 import org.koin.androidx.compose.koinViewModel
 
 class MainActivity : ComponentActivity() {
-
     private val googleAuthUiClient by lazy {
         GoogleAuthUiClient(
             context = applicationContext,
@@ -57,13 +54,14 @@ class MainActivity : ComponentActivity() {
         setContent {
             // Use koinViewModel() — NOT viewModel() from Jetpack
             // because GoogleAuthViewModel is registered in Koin
+            val vm: HomeViewModel = koinViewModel()
             val authViewModel: GoogleAuthViewModel = koinViewModel()
-
+            val isAdultUnlocked by vm.isAdultUnlocked.collectAsStateWithLifecycle()
             MyApplicationTheme {
                 val navController = rememberNavController()
 
                 // Tracks whether user has passed the age gate this session
-                var isAdultUnlocked by remember { mutableStateOf(false) }
+
 
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
@@ -211,15 +209,25 @@ class MainActivity : ComponentActivity() {
 
                             composable(Screen.Home.route) {
                                 HomeScreen(
+                                    vm = vm,
                                     isAdultUnlocked = isAdultUnlocked,
                                     onMangaClick = { mangaId, contentRating ->
                                         val destination = Screen.SeriesDetail.createRoute(mangaId)
-                                        if (contentRating == "erotica" && !isAdultUnlocked) {
+                                        if ((contentRating == "erotica" || contentRating == "pornographic") && !isAdultUnlocked) {
                                             navController.navigate(
                                                 Screen.AgeGate.createRoute(destination)
                                             )
                                         } else {
                                             navController.navigate(destination)
+                                        }
+                                    }, navToAgeGate = {
+                                        navController.navigate(Screen.AgeGate.createRoute(Screen.Home.route))
+                                    },
+                                    onSignOut = {
+                                        authViewModel.signOut()
+                                        vm.relock()
+                                        navController.navigate("sign_in") {
+                                            popUpTo(0) { inclusive = true }
                                         }
                                     }
                                 )
@@ -242,7 +250,8 @@ class MainActivity : ComponentActivity() {
                                 arguments = listOf(
                                     navArgument("mangaId") { type = NavType.StringType }
                                 )
-                            ) { backStackEntry ->
+                            )
+                            { backStackEntry ->
                                 val mangaId = backStackEntry.arguments
                                     ?.getString("mangaId") ?: return@composable
 
@@ -271,7 +280,8 @@ class MainActivity : ComponentActivity() {
                                     navArgument("mangaId") { type = NavType.StringType },
                                     navArgument("chapterId") { type = NavType.StringType }
                                 )
-                            ) { backStackEntry ->
+                            )
+                            { backStackEntry ->
                                 val mangaId = backStackEntry.arguments
                                     ?.getString("mangaId") ?: return@composable
                                 val chapterId = backStackEntry.arguments
@@ -318,7 +328,7 @@ class MainActivity : ComponentActivity() {
 
                                 AgeGateScreen(
                                     onVerified = {
-                                        isAdultUnlocked = true
+                                        vm.setAdultUnlocked(true)
                                         navController.navigate(destination) {
                                             popUpTo(Screen.AgeGate.route) { inclusive = true }
                                         }

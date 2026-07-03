@@ -184,6 +184,11 @@ class GoogleAuthViewModel(application: Application,
     fun onLogout() {
         authTokenStore.clearToken()
     }
+
+    fun signOut() {
+        auth.signOut()
+        authTokenStore.clearToken()
+    }
     // ── Single place that fetches + saves the token ───────────
     // Called after every successful login method above.
     // force = false means use cached token if still valid (< 1 hour old)

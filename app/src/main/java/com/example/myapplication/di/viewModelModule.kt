@@ -1,5 +1,7 @@
 package com.example.myapplication.di
 
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
 import com.example.myapplication.GoogleAuthViewModel
 import com.example.myapplication.viewmodels.HomeViewModel
 import com.example.myapplication.viewmodels.LibraryViewModel
@@ -13,12 +15,12 @@ val viewModelModule= module {
     // viewModel { } is Koin's special scope for ViewModels.
     // It ties the ViewModel lifecycle to the Compose NavBackStackEntry
     // or Activity — auto-cleared when the screen leaves the backstack.
-    viewModel { HomeViewModel(get()) }//get(): This tells Koin: "Go look in my other modules (like appModule or databaseModule) to find the dependency required by the HomeViewModel constructor."
+    viewModel { HomeViewModel(get(), get<DataStore<Preferences>>()) }
     viewModel { GoogleAuthViewModel(authTokenStore = get(),application = androidApplication()) }
-    viewModel { (mangaId: String) -> SeriesViewModel(get(),
+    viewModel { (mangaId: String,contentRating:List<String>) -> SeriesViewModel(get(),
         get(),
         get(),
-        mangaId) }
+        mangaId,contentRating) }
     viewModel { (mangaId: String, chapterId: String) ->
         ReaderViewModel(get(),
             get(),

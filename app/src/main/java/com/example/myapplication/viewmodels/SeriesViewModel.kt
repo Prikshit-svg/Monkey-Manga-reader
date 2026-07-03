@@ -23,7 +23,8 @@ class SeriesViewModel(
     private val mangaRepository: MangaRepository,
     private val chapterRepository: ChapterRepository,
     private val progressRepository: ReadingProgressRepository,
-    private val mangaId: String
+    private val mangaId: String,
+    private val contentRating: List<String>
 ) : ViewModel() {
 
 
@@ -125,7 +126,7 @@ class SeriesViewModel(
 
         // Sync chapters from API separately
         viewModelScope.launch {
-            chapterRepository.syncChapters(mangaId).onFailure { e ->
+            chapterRepository.syncChapters(mangaId,contentRating).onFailure { e ->
                 if (_chapterListState.value !is ChapterListState.Success) {
                     _chapterListState.value =
                         ChapterListState.Error(e.message ?: "Failed to load chapters")

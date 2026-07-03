@@ -33,7 +33,7 @@ class ChapterRepository(
             chapterDao.getPreviousChapter(mangaId, currentNumber)
         }
 
-    suspend fun syncChapters(mangaId: String): Result<Unit> =
+    suspend fun syncChapters(mangaId: String, contentRating: List<String>): Result<Unit> =
         withContext(Dispatchers.IO) {
             runCatching {
                 var offset = 0
@@ -44,7 +44,8 @@ class ChapterRepository(
                         limit = 100,
                         offset = offset,
                         language = listOf("en"),    // ← default lives here
-                        order = "asc"
+                        order = "asc",
+                        contentRating =contentRating
                     )
                     allChapters += response.data.map { it.toEntity(mangaId) }
                     offset += response.limit

@@ -45,6 +45,7 @@ interface MangaDexApi {
         @Query("limit") limit: Int,
         @Query("offset") offset: Int,
         @Query("translatedLanguage[]") language: List<String>,
+        @Query("contentRating[]") contentRating: List<String>,
         @Query("order[chapter]") order: String
     ): ChapterListResponse
 

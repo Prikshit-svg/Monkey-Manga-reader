@@ -1,6 +1,9 @@
 package com.example.myapplication.di
 
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
 import androidx.room.Room
+import com.example.myapplication.createDataStorage
 import com.example.myapplication.database.MIGRATION_1_2
 import com.example.myapplication.database.MIGRATION_2_3
 import com.example.myapplication.database.MIGRATION_3_4
@@ -9,6 +12,7 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
 val databaseModule= module{
+    single<DataStore<Preferences>> { createDataStorage(androidContext()) }
     single{
         // THIS is where Room.databaseBuilder lives.
         // androidContext() is provided by Koin — it's your Application context.

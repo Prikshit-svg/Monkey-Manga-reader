@@ -157,7 +157,11 @@ private fun validateAge(day: String, month: String, year: String): String? {
         val today = Calendar.getInstance()
 
         var age = today.get(Calendar.YEAR) - dob.get(Calendar.YEAR)
-        if (today.get(Calendar.DAY_OF_YEAR) < dob.get(Calendar.DAY_OF_YEAR)) age--
+        if (today.get(Calendar.MONTH) < dob.get(Calendar.MONTH) ||
+            (today.get(Calendar.MONTH) == dob.get(Calendar.MONTH) &&
+             today.get(Calendar.DAY_OF_MONTH) < dob.get(Calendar.DAY_OF_MONTH))) {
+            age--
+        }
 
         return if (age < 18) "You must be 18 or older to view this content" else null
 }

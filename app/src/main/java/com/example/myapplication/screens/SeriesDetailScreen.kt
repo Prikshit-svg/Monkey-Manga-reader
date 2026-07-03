@@ -61,11 +61,12 @@ fun SeriesDetailScreen(
     mangaId: String,
     onChapterClick: (mangaId: String, chapterId: String) -> Unit,
     onNavigateBack: () -> Unit,
-    vm: SeriesViewModel = koinViewModel(
-        parameters = { parametersOf(mangaId) }
-    ),
     isAdultUnlocked: Boolean,
-    onAdultContentBlocked: (destination: String) -> Unit
+    onAdultContentBlocked: (destination: String) -> Unit,
+    vm: SeriesViewModel = koinViewModel(
+        parameters = { parametersOf(mangaId, if (isAdultUnlocked) listOf("safe","suggestive","erotica","pornographic") else listOf("safe","suggestive")) }
+    ),
+
 ) {
     val mangaDetailState by vm.mangaDetailState.collectAsStateWithLifecycle()
     val chapters by vm.chapters.collectAsStateWithLifecycle()

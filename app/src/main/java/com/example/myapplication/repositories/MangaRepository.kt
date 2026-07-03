@@ -56,7 +56,10 @@ class MangaRepository(
             }
         }
 
-    suspend fun searchAndSync(query: String): Result<Unit> =
+    suspend fun searchAndSync(
+        query: String,
+        contentRating: List<String> = listOf("safe", "suggestive")
+    ): Result<Unit> =
         withContext(Dispatchers.IO) {
             runCatching {
                 val response = api.searchManga(
@@ -64,7 +67,7 @@ class MangaRepository(
                     limit = 20,
                     offset = 0,
                     includes = listOf("cover_art", "author"),
-                    contentRating = listOf("safe", "suggestive"),
+                    contentRating = contentRating,
                     language = listOf("en"),
                     hasAvailableChapters = true
                 )
